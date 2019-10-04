@@ -1,3 +1,9 @@
+#include <printf.h>
+#include <nRF24L01.h>
+#include <RF24_config.h>
+#include <RF24.h>
+#include<SPI.h>
+
 const int CE = 7;
 const int CSN = 6;
 const int debugPin = 9;
@@ -15,12 +21,17 @@ const int debugPin = 9;
 //If two radios receive on same address, master will receive acknowledge and move to next state.
 //make sure to check sendNum (rec)
 
+//What I learned:
+//nrf24 library can be wrong.  need to flush rx after stopListen
+//need to wait greater than 1.2 ms (I put 5) in case ack was dropped
+//for another cycle
+
+//Had to add a 100nF cap in parallel with 100uF cap 
+//on power supply for radios
+
 volatile int commState;
 volatile int rec;
 const int sendNum = 1;
-
-#include<SPI.h>
-#include "RF24.h"
 
 RF24 radio (CE, CSN);
 const uint8_t writeAddresses[][6] = {"1", "2", "3", "4", "5"};
@@ -67,7 +78,7 @@ void loop() {
   switch (commState) {
     case 0:
       //set up transmit
-      setupTransmit(writeAddresses[1]);
+      setupTransmit(writeAddresses[0]);
       commState = 1;
       break;
     case 1:

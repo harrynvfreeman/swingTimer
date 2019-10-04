@@ -1,3 +1,9 @@
+#include <printf.h>
+#include <nRF24L01.h>
+#include <RF24_config.h>
+#include <RF24.h>
+#include<SPI.h>
+
 const int CE = 7;
 const int CSN = 6;
 const int iRPin = 0;
@@ -11,11 +17,8 @@ volatile int rec;
 const int sendNum = 2;
 volatile int debugCounter = 0;
 
-#include<SPI.h>
-#include "RF24.h"
-
 RF24 radio (CE, CSN);
-const int numAddress = 1;
+const int numAddress = 0;
 const uint8_t readAddresses[][6] = {"1", "2", "3", "4", "5"};
 const uint8_t writeAddresses[][6] = {"1Node","2Node", "3Node", "4Node", "5Node"};
 
