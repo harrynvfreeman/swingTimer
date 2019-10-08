@@ -14,15 +14,14 @@ const int distanceThresh = 200;
 
 volatile int commState;
 volatile int rec;
-volatile int debugCounter = 0;
+volatile unsigned long startTime;
+volatile unsigned long endTime;
+volatile unsigned long netTime;
 
 RF24 radio (CE, CSN);
-const int numAddress = 0;
+const int numAddress = 2;
 const uint8_t readAddresses[][6] = {"1", "2", "3", "4", "5"};
 const uint8_t writeAddresses[][6] = {"1Node","2Node", "3Node", "4Node", "5Node"};
-
-//const uint8_t readAddress[6] = {readAddresses[numAddress]};
-//const uint8_t writeAddress[6] = {writeAddresses[numAddress]};
 
 void setup() {
   Serial.begin(9600);
@@ -58,9 +57,8 @@ void loop() {
       if (radio.available()) {
         rec = 0;
         radio.read((int*)&rec, sizeof(rec));
-        Serial.print("Read: ");
-        Serial.println(rec);
         commState = 1;
+        startTime = millis();
       }
       break;
     case 1:
@@ -78,25 +76,19 @@ void loop() {
       distanceMeasure = analogRead(iRPin);
       if (distanceMeasure > distanceThresh) {
         commState = 3;
+        endTime = millis();
       }
       break;
     case 3:
-      distanceMeasure = analogRead(iRPin);
-      //if (distanceMeasure < distanceThresh) {
-      if (true) {
         setupTransmit(writeAddresses[numAddress]);
         commState = 4;
-      }
       break;
     case 4:
       //radio is in transmit mode
+      netTime = endTime - startTime;
       analogWrite(ledPin, 0);
-      Serial.println(debugCounter);
-      if (radio.write((int*)&debugCounter, sizeof(debugCounter))) {
+      if (radio.write((unsigned long*)&netTime, sizeof(netTime))) {
         setupReceive();
-        Serial.print("Wrote: ");
-        Serial.println(debugCounter);
-        debugCounter = debugCounter + 1;
         commState = 0;
       }
       break;

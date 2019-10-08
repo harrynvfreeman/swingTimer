@@ -32,7 +32,9 @@ const int debugPin = 9;
 //Remember to comment radio supplied higher power go into write mode
 
 volatile int commState;
-volatile int rec;
+volatile unsigned long rec;
+volatile unsigned long seconds;
+volatile unsigned long mils;
 const int sendNum = 1;
 
 RF24 radio (CE, CSN);
@@ -41,7 +43,6 @@ const uint8_t readAddresses[][6] = {"1Node","2Node", "3Node", "4Node", "5Node"};
                        
 const int numAddresses = 3;
 volatile int sendAddress;
-volatile int debugCounter = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -86,12 +87,8 @@ void loop() {
     case 1:
       //radio is in transmit mode
       analogWrite(debugPin, 0);
-      Serial.println(debugCounter);
-      if (radio.write((int*)&debugCounter, sizeof(debugCounter))) {
+      if (radio.write((int*)&sendNum, sizeof(sendNum))) {
         setupReceive();
-        Serial.print("Wrote: ");
-        Serial.println(debugCounter);
-        debugCounter = debugCounter + 1;
         commState = 2;
       }
       break;
@@ -100,8 +97,14 @@ void loop() {
       analogWrite(debugPin, 255);
       if (radio.available()) {
         rec = 0;
-        radio.read((int*)&rec, sizeof(rec));
-        Serial.print("Read: ");
+        radio.read((unsigned long*)&rec, sizeof(rec));
+        seconds = rec / 1000;
+        mils = rec % 1000;
+        Serial.print("Time took: ");
+        Serial.print(seconds);
+        Serial.print(" and ");
+        Serial.print(mils);
+        Serial.println(" ms.");
         Serial.println(rec);
         commState = 3;
         sendAddress = (sendAddress + 1) % numAddresses;
