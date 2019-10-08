@@ -29,6 +29,8 @@ const int debugPin = 9;
 //Had to add a 100nF cap in parallel with 100uF cap 
 //on power supply for radios
 
+//Remember to comment radio supplied higher power go into write mode
+
 volatile int commState;
 volatile int rec;
 const int sendNum = 1;
@@ -37,7 +39,7 @@ RF24 radio (CE, CSN);
 const uint8_t writeAddresses[][6] = {"1", "2", "3", "4", "5"};
 const uint8_t readAddresses[][6] = {"1Node","2Node", "3Node", "4Node", "5Node"};
                        
-const int numAddresses = 2;
+const int numAddresses = 3;
 volatile int sendAddress;
 volatile int debugCounter = 0;
 
@@ -78,7 +80,7 @@ void loop() {
   switch (commState) {
     case 0:
       //set up transmit
-      setupTransmit(writeAddresses[0]);
+      setupTransmit(writeAddresses[sendAddress]);
       commState = 1;
       break;
     case 1:
@@ -102,7 +104,7 @@ void loop() {
         Serial.print("Read: ");
         Serial.println(rec);
         commState = 3;
-        sendAddress = 1 - sendAddress;
+        sendAddress = (sendAddress + 1) % numAddresses;
       }
       break;
     case 3:

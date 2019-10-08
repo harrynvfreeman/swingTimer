@@ -14,7 +14,6 @@ const int distanceThresh = 200;
 
 volatile int commState;
 volatile int rec;
-const int sendNum = 2;
 volatile int debugCounter = 0;
 
 RF24 radio (CE, CSN);
