@@ -55,8 +55,10 @@ void loop() {
       //Radio is in receive mode
       analogWrite(ledPin, 255);
       if (radio.available()) {
+        Serial.println("Message Recccced");
         rec = 0;
         radio.read((int*)&rec, sizeof(rec));
+        Serial.println("Going to 1");
         commState = 1;
         startTime = millis();
       }
@@ -66,6 +68,7 @@ void loop() {
       //receive acknowledge.
       //wait here for a bit just so it can resend
       delay(5);
+      Serial.println("Going to 2");
       commState = 2;
       break;
     case 2:
@@ -75,12 +78,14 @@ void loop() {
       analogWrite(ledPin, 20);
       distanceMeasure = analogRead(iRPin);
       if (distanceMeasure > distanceThresh) {
+        Serial.println("Going to 3");
         commState = 3;
         endTime = millis();
       }
       break;
     case 3:
         setupTransmit(writeAddresses[numAddress]);
+        Serial.println("Going to 4");
         commState = 4;
       break;
     case 4:
@@ -90,6 +95,7 @@ void loop() {
       if (radio.write((unsigned long*)&netTime, sizeof(netTime))) {
         setupReceive();
         commState = 0;
+        Serial.println("Going to 0");
       }
       break;
   }
