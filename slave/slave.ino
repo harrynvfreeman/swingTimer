@@ -46,7 +46,19 @@ void setupTransmit(const uint8_t *address) {
 
 void setupReceive() {
   radio.flush_tx();
+  radio.flush_rx();
   radio.startListening();
+}
+
+void resetRadio() {
+  radio.begin();
+  radio.setPALevel(RF24_PA_MIN);
+  radio.setDataRate(RF24_250KBPS);
+  radio.txDelay = 250;
+  radio.csDelay = 10;
+  radio.setChannel(112);
+  radio.openReadingPipe(1, readAddresses[numAddress]);
+  setupReceive();
 }
 
 void loop() {
@@ -96,6 +108,8 @@ void loop() {
         setupReceive();
         commState = 0;
         Serial.println("Going to 0");
+        delay(500); //for debouncing
+        //resetRadio();
       }
       break;
   }
